@@ -1,0 +1,58 @@
+version: '3.7'
+
+services:
+  postgres-service:
+    container_name: postgres:alpine
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_PASSWORD k!md0$25K
+    volumes:
+      - ./storage/pgdata:/var/lib/postgresql/data
+      # copy the sql script to create tables
+      - ./postgres/wpos.sql:/docker-entrypoint-initdb.d/create_tables.sql 
+      
+  pgadmin-service:
+    image: dpage/pgadmin4:latest
+    restart: always
+    ports:
+      - 8090:80
+    hostname: pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL=doseok@madang.cc
+      PGADMIN_DEFAULT_PASSWORD_file:
+        /run/secrets/pgadmin_password
+    secrets:
+      - pgadmin_password
+
+  rabbit-service:
+    image: rabbitmq:3-management-alpine
+    environment:
+      - RABBITMQ_SSL_CERTFILE=/certs/server_HPRYZEN_certificate.pem
+      - RABBITMQ_SSL_KEYFILE=/certs/server_HPRYZEN_key.pem
+      - RABBITMQ_SSL_CACERTFILE=/certs/ca_certificate.pem
+            
+    hostname: rabbit-service
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+      - "5671:5671"
+    volumes:
+      - ~/storage/rabbitmq/data/:/var/lib/rabbitmq/
+      - ~/storage/rabbitmq/log/:/var/log/rabbitmq
+      - ./storage/certs:/certs
+      
+  apache-service:
+    container_name: apache2
+    restart: always
+    ports:
+      - "80:80"
+    build:
+      context: ./apache
+      dockerfile: Dockerfile
+      args:
+        buildno: 1
+    volumes:
+      - ./storage/www:/var/www/html
+      

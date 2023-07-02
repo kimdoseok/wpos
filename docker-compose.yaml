@@ -1,0 +1,21 @@
+version: '3.7'
+
+services:
+  rabbit-service:
+    image: rabbitmq:3-management-alpine
+    #environment:
+    #  - RABBITMQ_SSL_CERTFILE=/certs/server_HPRYZEN_certificate.pem
+    #  - RABBITMQ_SSL_KEYFILE=/certs/server_HPRYZEN_key.pem
+    #  - RABBITMQ_SSL_CACERTFILE=/certs/ca_certificate.pem
+            
+    hostname: rabbit-service
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+      - "5671:5671"
+    build:
+    
+    volumes:
+      - ~/storage/rabbitmq/data/:/var/lib/rabbitmq/
+      - ~/storage/rabbitmq/log/:/var/log/rabbitmq
+      - ./storage/certs:/certs
